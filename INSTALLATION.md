@@ -30,8 +30,7 @@ Copy these files from this repository's `templates/` folder:
 1. `templates/PROMPT_build.md` → `PROMPT_build.md`
 2. `templates/PROMPT_plan.md` → `PROMPT_plan.md`
 3. `templates/AGENTS.md` → `AGENTS.md`
-4. `templates/IMPLEMENTATION_PLAN.md` → `IMPLEMENTATION_PLAN.md`
-5. `templates/spec-template.md` → `templates/spec-template.md`
+4. `templates/spec-template.md` → `templates/spec-template.md`
 
 Copy the loop scripts:
 
