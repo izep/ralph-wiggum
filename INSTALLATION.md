@@ -65,14 +65,13 @@ Present questions one at a time and wait for responses.
 
 ### Question 4: Technical Stack
 > "What is your project's primary technical stack? Examples: 'Next.js, TypeScript, Tailwind CSS' or 'Python, FastAPI, PostgreSQL'"
+>
+> **Note:** For new projects, it's often best to let the AI agent choose the tech stack based on the project requirements. For existing projects being Ralphified, I can analyze the codebase and answer this myself.
 
-### Question 5: Source Code Location
-> "Where is your main source code located? (e.g., 'src/', 'app/', 'lib/')"
-
-### Question 6: Test Commands
+### Question 5: Test Commands
 > "What commands run your tests? (e.g., 'npm test', 'pytest', 'go test ./...')"
 
-### Question 7: YOLO Mode (Full Autonomy)
+### Question 6: YOLO Mode (Full Autonomy)
 
 Present this carefully:
 
@@ -92,7 +91,7 @@ Present this carefully:
 > 
 > Enable YOLO Mode? (yes/no)"
 
-### Question 8: Git Autonomy
+### Question 7: Git Autonomy
 
 > "Do you want the AI to **autonomously commit and push** to your git repository without asking?
 > 
@@ -100,7 +99,7 @@ Present this carefully:
 > 
 > Enable Git Autonomy? (yes/no)"
 
-### Question 9: Work Item Source
+### Question 8: Work Item Source
 
 > "Where will your specifications/work items come from?
 > 
