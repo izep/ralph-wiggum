@@ -100,11 +100,11 @@ Point your AI agent to this repo and say:
 
 > "Set up Ralph Wiggum in my project using https://github.com/fstandhartinger/ralph-wiggum"
 
-The agent will:
-1. Create all necessary files
-2. Interview you about your project
-3. Create a constitution.md with your preferences
-4. Set up the bash loop scripts
+The agent will read [INSTALLATION.md](INSTALLATION.md) and:
+1. Create all necessary directories and files
+2. Download the Ralph loop scripts
+3. Interview you about your project
+4. Create a constitution.md with your preferences
 5. Explain how to create specs and run Ralph
 
 ### Manual Setup
