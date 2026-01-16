@@ -277,11 +277,15 @@ fi
 # Get current branch
 CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "main")
 
-# Check for work sources
+# Check for work sources - count .md files in specs/
 HAS_PLAN=false
 HAS_SPECS=false
+SPEC_COUNT=0
 [ -f "IMPLEMENTATION_PLAN.md" ] && HAS_PLAN=true
-[ -d "specs" ] && [ "$(ls -A specs 2>/dev/null)" ] && HAS_SPECS=true
+if [ -d "specs" ]; then
+    SPEC_COUNT=$(find specs -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l)
+    [ "$SPEC_COUNT" -gt 0 ] && HAS_SPECS=true
+fi
 
 echo ""
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -301,10 +305,9 @@ else
     echo -e "  ${YELLOW}○${NC} IMPLEMENTATION_PLAN.md (not found, that's OK)"
 fi
 if [ "$HAS_SPECS" = true ]; then
-    SPEC_COUNT=$(ls -d specs/*/ 2>/dev/null | wc -l)
     echo -e "  ${GREEN}✓${NC} specs/ folder ($SPEC_COUNT specs)"
 else
-    echo -e "  ${RED}✗${NC} specs/ folder (empty or not found)"
+    echo -e "  ${RED}✗${NC} specs/ folder (no .md files found)"
 fi
 echo ""
 echo -e "${CYAN}The loop checks for <promise>DONE</promise> in each iteration.${NC}"
