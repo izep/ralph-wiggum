@@ -28,6 +28,7 @@ RLM_INDEX="$RLM_DIR/index.tsv"
 MAX_ITERATIONS=0  # 0 = unlimited
 MODE="build"
 RLM_CONTEXT_FILE=""
+CODEX_CMD="${CODEX_CMD:-codex}"
 
 # Colors
 RED='\033[0;31m'
@@ -147,7 +148,7 @@ SESSION_LOG="$LOG_DIR/ralph_codex_${MODE}_session_$(date '+%Y%m%d_%H%M%S').log"
 exec > >(tee -a "$SESSION_LOG") 2>&1
 
 # Check if Codex CLI is available
-if ! command -v codex &> /dev/null; then
+if ! command -v "$CODEX_CMD" &> /dev/null; then
     echo -e "${RED}Error: Codex CLI not found${NC}"
     echo ""
     echo "Install Codex CLI:"
@@ -209,7 +210,7 @@ else
     echo -e "  ${RED}✗${NC} specs/ folder (no .md files found)"
 fi
 echo ""
-echo -e "${CYAN}Using: codex $CODEX_FLAGS${NC}"
+echo -e "${CYAN}Using: $CODEX_CMD $CODEX_FLAGS${NC}"
 echo -e "${CYAN}Agent must output <promise>DONE</promise> when complete.${NC}"
 echo ""
 echo -e "${YELLOW}Press Ctrl+C to stop the loop${NC}"
@@ -294,11 +295,11 @@ EOF
 
     # Run Codex with exec mode, reading prompt from stdin with "-"
     # Use --output-last-message to capture the final response for checking
-    echo -e "${BLUE}Running: cat $EFFECTIVE_PROMPT_FILE | codex $CODEX_FLAGS - --output-last-message $OUTPUT_FILE${NC}"
+    echo -e "${BLUE}Running: cat $EFFECTIVE_PROMPT_FILE | $CODEX_CMD $CODEX_FLAGS - --output-last-message $OUTPUT_FILE${NC}"
     echo ""
     
     CODEX_EXIT=0
-    if cat "$EFFECTIVE_PROMPT_FILE" | codex $CODEX_FLAGS - --output-last-message "$OUTPUT_FILE" 2>&1 | tee "$LOG_FILE"; then
+    if cat "$EFFECTIVE_PROMPT_FILE" | "$CODEX_CMD" $CODEX_FLAGS - --output-last-message "$OUTPUT_FILE" 2>&1 | tee "$LOG_FILE"; then
         echo ""
         echo -e "${GREEN}✓ Codex execution completed${NC}"
         

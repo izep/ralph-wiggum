@@ -30,6 +30,9 @@ QUERY_FILE=""
 OUTPUT_FILE=""
 CONTEXT_FILE=""
 
+CLAUDE_CMD="${CLAUDE_CMD:-claude}"
+CODEX_CMD="${CODEX_CMD:-codex}"
+
 YOLO_ENABLED=true
 if [[ -f "$CONSTITUTION" ]]; then
     if grep -q "YOLO Mode.*DISABLED" "$CONSTITUTION" 2>/dev/null; then
@@ -108,9 +111,9 @@ fi
 
 # Auto-detect agent if not set
 if [ -z "$AGENT" ]; then
-    if command -v claude &> /dev/null; then
+    if command -v "$CLAUDE_CMD" &> /dev/null; then
         AGENT="claude"
-    elif command -v codex &> /dev/null; then
+    elif command -v "$CODEX_CMD" &> /dev/null; then
         AGENT="codex"
     else
         echo "Error: Neither 'claude' nor 'codex' CLI found."
@@ -151,7 +154,7 @@ if [ "$AGENT" = "claude" ]; then
     if [ "$YOLO_ENABLED" = true ]; then
         CLAUDE_FLAGS="$CLAUDE_FLAGS --dangerously-skip-permissions"
     fi
-    if OUTPUT=$(cat "$PROMPT_SNAPSHOT" | claude $CLAUDE_FLAGS 2>&1 | tee "$LOG_FILE"); then
+    if OUTPUT=$(cat "$PROMPT_SNAPSHOT" | "$CLAUDE_CMD" $CLAUDE_FLAGS 2>&1 | tee "$LOG_FILE"); then
         printf "%s\n" "$OUTPUT" > "$OUTPUT_FILE"
         cp "$LOG_FILE" "$OUTPUT_SNAPSHOT"
         STATUS="ok"
@@ -164,7 +167,7 @@ elif [ "$AGENT" = "codex" ]; then
     if [ "$YOLO_ENABLED" = true ]; then
         CODEX_FLAGS="$CODEX_FLAGS --dangerously-bypass-approvals-and-sandbox"
     fi
-    if cat "$PROMPT_SNAPSHOT" | codex $CODEX_FLAGS - --output-last-message "$OUTPUT_FILE" 2>&1 | tee "$LOG_FILE"; then
+    if cat "$PROMPT_SNAPSHOT" | "$CODEX_CMD" $CODEX_FLAGS - --output-last-message "$OUTPUT_FILE" 2>&1 | tee "$LOG_FILE"; then
         cp "$LOG_FILE" "$OUTPUT_SNAPSHOT"
         STATUS="ok"
     else

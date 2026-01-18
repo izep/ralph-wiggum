@@ -40,7 +40,7 @@ RLM_INDEX="$RLM_DIR/index.tsv"
 # Configuration
 MAX_ITERATIONS=0  # 0 = unlimited
 MODE="build"
-CLAUDE_CMD="claude"
+CLAUDE_CMD="${CLAUDE_CMD:-claude}"
 YOLO_FLAG="--dangerously-skip-permissions"
 RLM_CONTEXT_FILE=""
 
