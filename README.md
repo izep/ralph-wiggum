@@ -106,18 +106,20 @@ Only use `plan` mode when you want a detailed breakdown of specs into smaller ta
 
 ## Installation
 
-### For AI Agents
+### For AI Agents (Recommended)
 
 Point your AI agent to this repo and say:
 
 > "Set up Ralph Wiggum in my project using https://github.com/fstandhartinger/ralph-wiggum"
 
-The agent will read [INSTALLATION.md](INSTALLATION.md) and:
-1. Create all necessary directories and files
-2. Download the Ralph loop scripts
-3. Interview you about your project
-4. Create a constitution.md with your preferences
-5. Explain how to create specs and run Ralph
+The agent will read [INSTALLATION.md](INSTALLATION.md) and guide you through a **lightweight, pleasant setup**:
+
+1. **Quick Setup** (~1 min) — Create directories, download scripts
+2. **Project Interview** (~3-5 min) — Focus on your **vision and goals**, not technical minutiae
+3. **Constitution** — Create a guiding document for all future sessions
+4. **Next Steps** — Clear guidance on creating specs and starting Ralph
+
+The interview prioritizes understanding *what you're building and why* over interrogating you about tech stack details. For existing projects, the agent can detect your stack automatically.
 
 ### Manual Setup
 
@@ -129,7 +131,7 @@ See [INSTALL.md](INSTALL.md) for step-by-step manual instructions.
 
 ### 1. Create Specifications
 
-Use `/speckit.specify` in Cursor or describe features to your AI:
+Tell your AI what you want to build, or use `/speckit.specify` in Cursor:
 
 ```
 /speckit.specify Add user authentication with OAuth
@@ -137,8 +139,10 @@ Use `/speckit.specify` in Cursor or describe features to your AI:
 
 This creates `specs/001-user-auth/spec.md` with:
 - Feature requirements
-- Acceptance criteria
+- **Clear, testable acceptance criteria** (critical!)
 - Completion signal section
+
+**The key to good specs:** Each spec needs acceptance criteria that are **specific and testable**. Not "works correctly" but "user can log in with Google and session persists across page reloads."
 
 ### 2. (Optional) Run Planning Mode
 

@@ -65,12 +65,14 @@ For full Ralph Wiggum setup with constitution and interview:
 "Set up Ralph Wiggum using https://github.com/fstandhartinger/ralph-wiggum"
 ```
 
-The agent will:
-1. Create project structure
-2. Interview you about project principles
-3. Create a constitution.md
-4. Set up bash loop scripts
-5. Explain how to create specs and run Ralph
+The agent will guide you through a **lightweight, pleasant setup**:
+
+1. **Quick Setup** (~1 min) — Create directories, download scripts
+2. **Project Interview** — Focus on your **vision and goals** (not tech details)
+3. **Constitution** — Create a guiding document for all sessions
+4. **Next Steps** — Clear guidance on creating specs and starting Ralph
+
+For existing projects, the agent detects your tech stack automatically. The interview prioritizes understanding *what you're building and why*.
 
 ## Core Concepts
 
@@ -105,7 +107,7 @@ Tests, lints, and builds act as guardrails. The agent must fix issues before out
 
 ### Creating Specifications
 
-Create specs with clear acceptance criteria:
+**The key to success:** Each spec needs **clear, testable acceptance criteria**. This is what tells Ralph when a task is truly "done."
 
 ```markdown
 # Feature: User Authentication
@@ -123,6 +125,11 @@ Create specs with clear acceptance criteria:
 
 **Output when complete:** `<promise>DONE</promise>`
 ```
+
+**Good criteria:** "User can log in with Google and session persists"
+**Bad criteria:** "Auth works correctly"
+
+The more specific your acceptance criteria, the better Ralph performs.
 
 ### Running the Loop
 
