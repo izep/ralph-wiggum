@@ -29,6 +29,8 @@ MAX_ITERATIONS=0  # 0 = unlimited
 MODE="build"
 RLM_CONTEXT_FILE=""
 CODEX_CMD="${CODEX_CMD:-codex}"
+TAIL_LINES=5
+TAIL_RENDERED_LINES=0
 
 # Colors
 RED='\033[0;31m'
@@ -80,6 +82,31 @@ RLM workspace (when enabled):
   - rlm/queries/ and rlm/answers/  For optional recursive sub-queries
 
 EOF
+}
+
+print_latest_output() {
+    local log_file="$1"
+    local label="${2:-Codex}"
+    local target="/dev/tty"
+
+    [ -f "$log_file" ] || return 0
+
+    if [ ! -w "$target" ]; then
+        target="/dev/stdout"
+    fi
+
+    if [ "$target" = "/dev/tty" ] && [ "$TAIL_RENDERED_LINES" -gt 0 ]; then
+        printf "\033[%dA\033[J" "$TAIL_RENDERED_LINES" > "$target"
+    fi
+
+    {
+        echo "Latest ${label} output (last ${TAIL_LINES} lines):"
+        tail -n "$TAIL_LINES" "$log_file"
+    } > "$target"
+
+    if [ "$target" = "/dev/tty" ]; then
+        TAIL_RENDERED_LINES=$((TAIL_LINES + 1))
+    fi
 }
 
 # Parse arguments
@@ -327,6 +354,7 @@ EOF
             echo -e "${YELLOW}  Retrying in next iteration...${NC}"
             CONSECUTIVE_FAILURES=$((CONSECUTIVE_FAILURES + 1))
             RLM_STATUS="incomplete"
+            print_latest_output "$LOG_FILE" "Codex"
             
             if [ $CONSECUTIVE_FAILURES -ge $MAX_CONSECUTIVE_FAILURES ]; then
                 echo ""
@@ -343,6 +371,7 @@ EOF
         echo -e "${YELLOW}Check log: $LOG_FILE${NC}"
         CONSECUTIVE_FAILURES=$((CONSECUTIVE_FAILURES + 1))
         RLM_STATUS="error"
+        print_latest_output "$LOG_FILE" "Codex"
     fi
 
     # Record iteration in RLM index (optional)
