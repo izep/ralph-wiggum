@@ -234,15 +234,23 @@ exec > >(tee -a "$SESSION_LOG") 2>&1
 if ! command -v "$GEMINI_CMD" &> /dev/null; then
     echo -e "${RED}Error: Gemini CLI not found${NC}"
     echo ""
-    echo "Install Gemini CLI. Options include:"
-    echo "  - Google AI Studio CLI"
-    echo "  - gcloud ai commands (Google Cloud SDK)"
-    echo "  - Third-party Gemini CLI tools"
+    echo "Install one of these AI coding CLIs:"
     echo ""
-    echo "Alternatively, try one of these CLIs:"
-    echo "  - Claude Code CLI: ./scripts/ralph-loop.sh"
-    echo "  - OpenAI Codex CLI: ./scripts/ralph-loop-codex.sh"
-    echo "  - GitHub Copilot CLI: ./scripts/ralph-loop-copilot.sh"
+    echo "1. Google Gemini CLI (recommended for this script):"
+    echo "   npm install -g @google/gemini-cli"
+    echo "   See: https://github.com/google-gemini/gemini-cli"
+    echo ""
+    echo "2. Claude Code CLI:"
+    echo "   https://claude.ai/code"
+    echo "   Run with: ./scripts/ralph-loop.sh"
+    echo ""
+    echo "3. GitHub Copilot CLI:"
+    echo "   npm install -g @github/copilot-cli"
+    echo "   Run with: ./scripts/ralph-loop-copilot.sh"
+    echo ""
+    echo "4. OpenAI Codex CLI:"
+    echo "   npm install -g @openai/codex"
+    echo "   Run with: ./scripts/ralph-loop-codex.sh"
     exit 1
 fi
 
@@ -418,8 +426,10 @@ fi
 CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "main")
 
 # Check for work sources - count .md files in specs/
+HAS_PLAN=false
 HAS_SPECS=false
 SPEC_COUNT=0
+[ -f "IMPLEMENTATION_PLAN.md" ] && HAS_PLAN=true
 if [ -d "specs" ]; then
     SPEC_COUNT=$(find specs -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l)
     [ "$SPEC_COUNT" -gt 0 ] && HAS_SPECS=true
@@ -439,14 +449,19 @@ echo -e "${YELLOW}YOLO:${NC}     $([ "$YOLO_ENABLED" = true ] && echo "ENABLED" 
 [ $MAX_ITERATIONS -gt 0 ] && echo -e "${BLUE}Max:${NC}      $MAX_ITERATIONS iterations"
 echo ""
 echo -e "${BLUE}Work source:${NC}"
+if [ "$HAS_PLAN" = true ]; then
+    echo -e "  ${GREEN}✓${NC} IMPLEMENTATION_PLAN.md (will use this)"
+else
+    echo -e "  ${YELLOW}○${NC} IMPLEMENTATION_PLAN.md (not found, that's OK)"
+fi
 if [ "$HAS_SPECS" = true ]; then
     echo -e "  ${GREEN}✓${NC} specs/ folder ($SPEC_COUNT specs)"
 else
     echo -e "  ${RED}✗${NC} specs/ folder (no .md files found)"
 fi
 echo ""
-echo -e "${CYAN}Using: $GEMINI_CMD${NC}"
-echo -e "${CYAN}Agent must output <promise>DONE</promise> when complete.${NC}"
+echo -e "${CYAN}The loop checks for <promise>DONE</promise> in each iteration.${NC}"
+echo -e "${CYAN}Agent must verify acceptance criteria before outputting it.${NC}"
 echo ""
 echo -e "${YELLOW}Press Ctrl+C to stop the loop${NC}"
 echo ""
@@ -454,14 +469,6 @@ echo ""
 ITERATION=0
 CONSECUTIVE_FAILURES=0
 MAX_CONSECUTIVE_FAILURES=3
-
-# Note: Gemini CLI interface depends on the specific CLI tool being used
-# This script provides a framework but may need adjustment based on the actual CLI API
-
-echo -e "${YELLOW}⚠ Note: Gemini CLI integration is experimental${NC}"
-echo -e "${YELLOW}   The specific API depends on your Gemini CLI tool${NC}"
-echo -e "${YELLOW}   You may need to adjust the command invocation${NC}"
-echo ""
 
 while true; do
     # Check max iterations
@@ -510,17 +517,23 @@ EOF
         cp "$EFFECTIVE_PROMPT_FILE" "$RLM_PROMPT_SNAPSHOT"
     fi
 
-    # Attempt to run Gemini CLI
-    # Note: This is a generic implementation. The actual API depends on which Gemini CLI is installed
-    # Common patterns might be: gemini chat, gemini prompt, etc.
-    echo -e "${BLUE}Reading prompt from: $EFFECTIVE_PROMPT_FILE${NC}"
+    # Build Gemini flags for non-interactive mode
+    GEMINI_FLAGS=""
+    if [ "$YOLO_ENABLED" = true ]; then
+        GEMINI_FLAGS="--yolo"
+    fi
+    
+    # Read prompt content
+    PROMPT_CONTENT=$(cat "$EFFECTIVE_PROMPT_FILE")
+    
+    echo -e "${BLUE}Running: gemini -p <prompt> $GEMINI_FLAGS${NC}"
     echo ""
     
     GEMINI_EXIT=0
     GEMINI_OUTPUT=""
     
-    # Try to pipe prompt to gemini command (adjust based on actual CLI)
-    if GEMINI_OUTPUT=$(cat "$EFFECTIVE_PROMPT_FILE" | "$GEMINI_CMD" 2>&1 | tee "$LOG_FILE"); then
+    # Run Gemini with -p flag for non-interactive mode
+    if GEMINI_OUTPUT=$("$GEMINI_CMD" -p "$PROMPT_CONTENT" $GEMINI_FLAGS 2>&1 | tee "$LOG_FILE"); then
         if [ -n "$WATCH_PID" ]; then
             kill "$WATCH_PID" 2>/dev/null || true
             wait "$WATCH_PID" 2>/dev/null || true
@@ -565,19 +578,16 @@ EOF
         GEMINI_EXIT=$?
         echo -e "${RED}✗ Gemini execution failed (exit code: $GEMINI_EXIT)${NC}"
         echo -e "${YELLOW}Check log: $LOG_FILE${NC}"
-        echo ""
-        echo -e "${YELLOW}Note: Gemini CLI command syntax may need adjustment${NC}"
-        echo -e "${YELLOW}Check your Gemini CLI documentation for the correct usage${NC}"
-        echo ""
-        echo -e "${YELLOW}Alternatively, try one of these CLIs:${NC}"
-        echo -e "${CYAN}  - Claude Code CLI: ./scripts/ralph-loop.sh${NC}"
-        echo -e "${CYAN}  - OpenAI Codex CLI: ./scripts/ralph-loop-codex.sh${NC}"
         CONSECUTIVE_FAILURES=$((CONSECUTIVE_FAILURES + 1))
         RLM_STATUS="error"
         print_latest_output "$LOG_FILE" "Gemini"
         
-        if [ $CONSECUTIVE_FAILURES -ge 1 ]; then
-            break
+        if [ $CONSECUTIVE_FAILURES -ge $MAX_CONSECUTIVE_FAILURES ]; then
+            echo ""
+            echo -e "${RED}⚠ $MAX_CONSECUTIVE_FAILURES consecutive failures.${NC}"
+            echo -e "${RED}  The agent may be stuck. Check logs:${NC}"
+            echo -e "${RED}  - $LOG_FILE${NC}"
+            CONSECUTIVE_FAILURES=0
         fi
     fi
 

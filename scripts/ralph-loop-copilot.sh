@@ -237,20 +237,20 @@ if ! command -v "$COPILOT_CMD" &> /dev/null; then
     echo "Install one of these AI coding CLIs:"
     echo ""
     echo "1. GitHub Copilot CLI (recommended for this script):"
+    echo "   npm install -g @github/copilot-cli"
     echo "   See: https://github.com/features/copilot"
-    echo "   The standalone copilot CLI should be in your PATH"
     echo ""
     echo "2. Claude Code CLI:"
     echo "   https://claude.ai/code"
     echo "   Run with: ./scripts/ralph-loop.sh"
     echo ""
-    echo "3. OpenAI Codex CLI:"
+    echo "3. Google Gemini CLI:"
+    echo "   npm install -g @google/gemini-cli"
+    echo "   Run with: ./scripts/ralph-loop-gemini.sh"
+    echo ""
+    echo "4. OpenAI Codex CLI:"
     echo "   npm install -g @openai/codex"
     echo "   Run with: ./scripts/ralph-loop-codex.sh"
-    echo ""
-    echo "4. Google Gemini CLI:"
-    echo "   (Installation varies by provider)"
-    echo "   Run with: ./scripts/ralph-loop-gemini.sh"
     exit 1
 fi
 
@@ -426,8 +426,10 @@ fi
 CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "main")
 
 # Check for work sources - count .md files in specs/
+HAS_PLAN=false
 HAS_SPECS=false
 SPEC_COUNT=0
+[ -f "IMPLEMENTATION_PLAN.md" ] && HAS_PLAN=true
 if [ -d "specs" ]; then
     SPEC_COUNT=$(find specs -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l)
     [ "$SPEC_COUNT" -gt 0 ] && HAS_SPECS=true
@@ -447,14 +449,19 @@ echo -e "${YELLOW}YOLO:${NC}     $([ "$YOLO_ENABLED" = true ] && echo "ENABLED" 
 [ $MAX_ITERATIONS -gt 0 ] && echo -e "${BLUE}Max:${NC}      $MAX_ITERATIONS iterations"
 echo ""
 echo -e "${BLUE}Work source:${NC}"
+if [ "$HAS_PLAN" = true ]; then
+    echo -e "  ${GREEN}✓${NC} IMPLEMENTATION_PLAN.md (will use this)"
+else
+    echo -e "  ${YELLOW}○${NC} IMPLEMENTATION_PLAN.md (not found, that's OK)"
+fi
 if [ "$HAS_SPECS" = true ]; then
     echo -e "  ${GREEN}✓${NC} specs/ folder ($SPEC_COUNT specs)"
 else
     echo -e "  ${RED}✗${NC} specs/ folder (no .md files found)"
 fi
 echo ""
-echo -e "${CYAN}Using: $COPILOT_CMD${NC}"
-echo -e "${CYAN}Agent must output <promise>DONE</promise> when complete.${NC}"
+echo -e "${CYAN}The loop checks for <promise>DONE</promise> in each iteration.${NC}"
+echo -e "${CYAN}Agent must verify acceptance criteria before outputting it.${NC}"
 echo ""
 echo -e "${YELLOW}Press Ctrl+C to stop the loop${NC}"
 echo ""
@@ -511,21 +518,21 @@ EOF
     fi
 
     # Build Copilot flags for non-interactive mode
-    COPILOT_FLAGS="-p"
+    COPILOT_FLAGS=""
     if [ "$YOLO_ENABLED" = true ]; then
-        COPILOT_FLAGS="$COPILOT_FLAGS --yolo"
+        COPILOT_FLAGS="--yolo"
     fi
     
     # Read prompt content
     PROMPT_CONTENT=$(cat "$EFFECTIVE_PROMPT_FILE")
     
-    echo -e "${BLUE}Running: copilot $COPILOT_FLAGS <prompt>${NC}"
+    echo -e "${BLUE}Running: copilot -p <prompt> $COPILOT_FLAGS${NC}"
     echo ""
     
     # Run Copilot with prompt via -p flag, capture output
     COPILOT_EXIT=0
     COPILOT_OUTPUT=""
-    if COPILOT_OUTPUT=$("$COPILOT_CMD" $COPILOT_FLAGS "$PROMPT_CONTENT" 2>&1 | tee "$LOG_FILE"); then
+    if COPILOT_OUTPUT=$("$COPILOT_CMD" -p "$PROMPT_CONTENT" $COPILOT_FLAGS 2>&1 | tee "$LOG_FILE"); then
         if [ -n "$WATCH_PID" ]; then
             kill "$WATCH_PID" 2>/dev/null || true
             wait "$WATCH_PID" 2>/dev/null || true

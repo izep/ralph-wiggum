@@ -247,11 +247,11 @@ if ! command -v "$CODEX_CMD" &> /dev/null; then
     echo "   Run with: ./scripts/ralph-loop.sh"
     echo ""
     echo "3. GitHub Copilot CLI:"
-    echo "   gh extension install github/gh-copilot"
+    echo "   npm install -g @github/copilot-cli"
     echo "   Run with: ./scripts/ralph-loop-copilot.sh"
     echo ""
     echo "4. Google Gemini CLI:"
-    echo "   (Installation varies by provider)"
+    echo "   npm install -g @google/gemini-cli"
     echo "   Run with: ./scripts/ralph-loop-gemini.sh"
     exit 1
 fi
@@ -434,8 +434,10 @@ fi
 CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "main")
 
 # Check for work sources - count .md files in specs/
+HAS_PLAN=false
 HAS_SPECS=false
 SPEC_COUNT=0
+[ -f "IMPLEMENTATION_PLAN.md" ] && HAS_PLAN=true
 if [ -d "specs" ]; then
     SPEC_COUNT=$(find specs -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l)
     [ "$SPEC_COUNT" -gt 0 ] && HAS_SPECS=true
@@ -455,14 +457,19 @@ echo -e "${YELLOW}YOLO:${NC}     $([ "$YOLO_ENABLED" = true ] && echo "ENABLED" 
 [ $MAX_ITERATIONS -gt 0 ] && echo -e "${BLUE}Max:${NC}      $MAX_ITERATIONS iterations"
 echo ""
 echo -e "${BLUE}Work source:${NC}"
+if [ "$HAS_PLAN" = true ]; then
+    echo -e "  ${GREEN}✓${NC} IMPLEMENTATION_PLAN.md (will use this)"
+else
+    echo -e "  ${YELLOW}○${NC} IMPLEMENTATION_PLAN.md (not found, that's OK)"
+fi
 if [ "$HAS_SPECS" = true ]; then
     echo -e "  ${GREEN}✓${NC} specs/ folder ($SPEC_COUNT specs)"
 else
     echo -e "  ${RED}✗${NC} specs/ folder (no .md files found)"
 fi
 echo ""
-echo -e "${CYAN}Using: $CODEX_CMD $CODEX_FLAGS${NC}"
-echo -e "${CYAN}Agent must output <promise>DONE</promise> when complete.${NC}"
+echo -e "${CYAN}The loop checks for <promise>DONE</promise> in each iteration.${NC}"
+echo -e "${CYAN}Agent must verify acceptance criteria before outputting it.${NC}"
 echo ""
 echo -e "${YELLOW}Press Ctrl+C to stop the loop${NC}"
 echo ""
