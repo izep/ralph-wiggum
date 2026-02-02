@@ -236,11 +236,23 @@ exec > >(tee -a "$SESSION_LOG") 2>&1
 if ! command -v "$CODEX_CMD" &> /dev/null; then
     echo -e "${RED}Error: Codex CLI not found${NC}"
     echo ""
-    echo "Install Codex CLI:"
-    echo "  npm install -g @openai/codex"
+    echo "Install one of these AI coding CLIs:"
     echo ""
-    echo "Then authenticate:"
-    echo "  codex login"
+    echo "1. OpenAI Codex CLI (recommended for this script):"
+    echo "   npm install -g @openai/codex"
+    echo "   Then: codex login"
+    echo ""
+    echo "2. Claude Code CLI:"
+    echo "   https://claude.ai/code"
+    echo "   Run with: ./scripts/ralph-loop.sh"
+    echo ""
+    echo "3. GitHub Copilot CLI:"
+    echo "   gh extension install github/gh-copilot"
+    echo "   Run with: ./scripts/ralph-loop-copilot.sh"
+    echo ""
+    echo "4. Google Gemini CLI:"
+    echo "   (Installation varies by provider)"
+    echo "   Run with: ./scripts/ralph-loop-gemini.sh"
     exit 1
 fi
 

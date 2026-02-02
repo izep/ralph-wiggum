@@ -252,6 +252,20 @@ This mirrors the idea from Recursive Language Models (RLMs), which treat long pr
 ./scripts/ralph-loop-codex.sh
 ```
 
+### Using GitHub Copilot CLI
+
+```bash
+./scripts/ralph-loop-copilot.sh plan
+./scripts/ralph-loop-copilot.sh
+```
+
+### Using Google Gemini CLI
+
+```bash
+./scripts/ralph-loop-gemini.sh plan
+./scripts/ralph-loop-gemini.sh
+```
+
 ---
 
 ## File Structure
@@ -266,7 +280,9 @@ project/
 │       └── spec.md               # Feature specification
 ├── scripts/
 │   ├── ralph-loop.sh             # Claude Code loop
-│   └── ralph-loop-codex.sh       # OpenAI Codex loop
+│   ├── ralph-loop-codex.sh       # OpenAI Codex loop
+│   ├── ralph-loop-copilot.sh     # GitHub Copilot loop
+│   └── ralph-loop-gemini.sh      # Google Gemini loop
 ├── PROMPT_build.md               # Build mode instructions
 ├── PROMPT_plan.md                # Planning mode instructions
 ├── IMPLEMENTATION_PLAN.md        # (OPTIONAL) Detailed task list

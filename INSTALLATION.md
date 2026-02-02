@@ -33,9 +33,11 @@ Fetch from GitHub raw URLs:
 |--------|-----|---------|
 | ralph-loop.sh | `https://raw.githubusercontent.com/fstandhartinger/ralph-wiggum/main/scripts/ralph-loop.sh` | `scripts/ralph-loop.sh` |
 | ralph-loop-codex.sh | `https://raw.githubusercontent.com/fstandhartinger/ralph-wiggum/main/scripts/ralph-loop-codex.sh` | `scripts/ralph-loop-codex.sh` |
+| ralph-loop-copilot.sh | `https://raw.githubusercontent.com/fstandhartinger/ralph-wiggum/main/scripts/ralph-loop-copilot.sh` | `scripts/ralph-loop-copilot.sh` |
+| ralph-loop-gemini.sh | `https://raw.githubusercontent.com/fstandhartinger/ralph-wiggum/main/scripts/ralph-loop-gemini.sh` | `scripts/ralph-loop-gemini.sh` |
 
 ```bash
-chmod +x scripts/ralph-loop.sh scripts/ralph-loop-codex.sh
+chmod +x scripts/ralph-loop.sh scripts/ralph-loop-codex.sh scripts/ralph-loop-copilot.sh scripts/ralph-loop-gemini.sh
 ```
 
 ---
@@ -233,6 +235,12 @@ When all specs appear complete, the agent will:
 # OpenAI Codex
 ./scripts/ralph-loop-codex.sh
 
+# GitHub Copilot
+./scripts/ralph-loop-copilot.sh
+
+# Google Gemini
+./scripts/ralph-loop-gemini.sh
+
 # With iteration limit
 ./scripts/ralph-loop.sh 20
 ```
@@ -358,6 +366,8 @@ Here's what was created:
 | `.specify/memory/constitution.md` | Your project's guiding document |
 | `scripts/ralph-loop.sh` | The autonomous build loop (Claude/Cursor) |
 | `scripts/ralph-loop-codex.sh` | The autonomous build loop (Codex) |
+| `scripts/ralph-loop-copilot.sh` | The autonomous build loop (GitHub Copilot) |
+| `scripts/ralph-loop-gemini.sh` | The autonomous build loop (Gemini) |
 | `AGENTS.md` / `CLAUDE.md` | Entry points for AI agents |
 | `PROMPT_build.md` | Instructions for build mode |
 
@@ -390,6 +400,12 @@ Once you have specs, run:
 
 # For Codex CLI
 ./scripts/ralph-loop-codex.sh
+
+# For GitHub Copilot CLI
+./scripts/ralph-loop-copilot.sh
+
+# For Gemini CLI
+./scripts/ralph-loop-gemini.sh
 ```
 
 Ralph will:
@@ -427,8 +443,10 @@ Each iteration starts with a fresh context window. No context overflow, no degra
 | Task | Command |
 |------|---------|
 | Create spec | Tell me or `/speckit.specify [feature]` |
-| Start building | `./scripts/ralph-loop.sh` |
+| Start building (Claude) | `./scripts/ralph-loop.sh` |
 | Use Codex | `./scripts/ralph-loop-codex.sh` |
+| Use Copilot | `./scripts/ralph-loop-copilot.sh` |
+| Use Gemini | `./scripts/ralph-loop-gemini.sh` |
 | Limit iterations | `./scripts/ralph-loop.sh 20` |
 | RLM mode (large context) | `./scripts/ralph-loop.sh --rlm-context ./rlm/context.txt` |
 | RLM subcall (optional) | `./scripts/rlm-subcall.sh --query rlm/queries/q1.md` |

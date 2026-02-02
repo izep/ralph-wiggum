@@ -32,6 +32,8 @@ CONTEXT_FILE=""
 
 CLAUDE_CMD="${CLAUDE_CMD:-claude}"
 CODEX_CMD="${CODEX_CMD:-codex}"
+COPILOT_CMD="${COPILOT_CMD:-copilot}"
+GEMINI_CMD="${GEMINI_CMD:-gemini}"
 
 YOLO_ENABLED=true
 if [[ -f "$CONSTITUTION" ]]; then
@@ -46,15 +48,15 @@ RLM Subcall Helper (Experimental)
 
 Usage:
   ./scripts/rlm-subcall.sh --query <file>
-  ./scripts/rlm-subcall.sh --agent claude|codex --query <file> --output <file>
+  ./scripts/rlm-subcall.sh --agent claude|codex|copilot|gemini --query <file> --output <file>
   ./scripts/rlm-subcall.sh --agent codex --query <file> --context <file>
 
 Options:
-  --agent <claude|codex>   Force specific agent (auto-detect if omitted)
-  --query <file>           Query prompt file (required)
-  --output <file>          Output file (default: rlm/answers/subcall_<ts>.md)
-  --context <file>         Large context file to treat as external environment
-  -h, --help               Show help
+  --agent <claude|codex|copilot|gemini>  Force specific agent (auto-detect if omitted)
+  --query <file>                         Query prompt file (required)
+  --output <file>                        Output file (default: rlm/answers/subcall_<ts>.md)
+  --context <file>                       Large context file to treat as external environment
+  -h, --help                             Show help
 EOF
 }
 
@@ -115,8 +117,18 @@ if [ -z "$AGENT" ]; then
         AGENT="claude"
     elif command -v "$CODEX_CMD" &> /dev/null; then
         AGENT="codex"
+    elif command -v "$COPILOT_CMD" &> /dev/null; then
+        AGENT="copilot"
+    elif command -v "$GEMINI_CMD" &> /dev/null; then
+        AGENT="gemini"
     else
-        echo "Error: Neither 'claude' nor 'codex' CLI found."
+        echo "Error: No supported CLI found (claude, codex, copilot, or gemini)."
+        echo ""
+        echo "Install one of these:"
+        echo "  - Claude Code CLI: https://claude.ai/code"
+        echo "  - OpenAI Codex CLI: npm install -g @openai/codex"
+        echo "  - GitHub Copilot CLI: (standalone copilot command)"
+        echo "  - Gemini CLI: (varies by provider)"
         exit 1
     fi
 fi
@@ -174,8 +186,32 @@ elif [ "$AGENT" = "codex" ]; then
         cp "$LOG_FILE" "$OUTPUT_SNAPSHOT"
         STATUS="error"
     fi
+elif [ "$AGENT" = "copilot" ]; then
+    COPILOT_FLAGS="-p"
+    if [ "$YOLO_ENABLED" = true ]; then
+        COPILOT_FLAGS="$COPILOT_FLAGS --yolo"
+    fi
+    PROMPT_CONTENT=$(cat "$PROMPT_SNAPSHOT")
+    if OUTPUT=$("$COPILOT_CMD" $COPILOT_FLAGS "$PROMPT_CONTENT" 2>&1 | tee "$LOG_FILE"); then
+        printf "%s\n" "$OUTPUT" > "$OUTPUT_FILE"
+        cp "$LOG_FILE" "$OUTPUT_SNAPSHOT"
+        STATUS="ok"
+    else
+        cp "$LOG_FILE" "$OUTPUT_SNAPSHOT"
+        STATUS="error"
+    fi
+elif [ "$AGENT" = "gemini" ]; then
+    if OUTPUT=$(cat "$PROMPT_SNAPSHOT" | "$GEMINI_CMD" 2>&1 | tee "$LOG_FILE"); then
+        printf "%s\n" "$OUTPUT" > "$OUTPUT_FILE"
+        cp "$LOG_FILE" "$OUTPUT_SNAPSHOT"
+        STATUS="ok"
+    else
+        cp "$LOG_FILE" "$OUTPUT_SNAPSHOT"
+        echo "Note: Gemini CLI command may need adjustment based on your specific CLI" >> "$LOG_FILE"
+        STATUS="error"
+    fi
 else
-    echo "Error: unknown agent '$AGENT' (use 'claude' or 'codex')."
+    echo "Error: unknown agent '$AGENT' (use 'claude', 'codex', 'copilot', or 'gemini')."
     exit 1
 fi
 

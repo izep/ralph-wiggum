@@ -1,27 +1,14 @@
 #!/bin/bash
 #
-# Ralph Loop for Claude Code
+# Ralph Loop for GitHub Copilot CLI
 #
-# Based on Geoffrey Huntley's Ralph Wiggum methodology:
-# https://github.com/ghuntley/how-to-ralph-wiggum
-#
+# Based on Geoffrey Huntley's Ralph Wiggum methodology.
 # Combined with SpecKit-style specifications.
 #
-# Key principles:
-# - Each iteration picks ONE task/spec to work on
-# - Agent works until acceptance criteria are met
-# - Only outputs <promise>DONE</promise> when truly complete
-# - Bash loop checks for magic phrase before continuing
-# - Fresh context window each iteration
-#
-# Work sources (in priority order):
-# 1. IMPLEMENTATION_PLAN.md (if exists) - pick highest priority task
-# 2. specs/ folder - pick highest priority incomplete spec
-#
 # Usage:
-#   ./scripts/ralph-loop.sh              # Build mode (unlimited)
-#   ./scripts/ralph-loop.sh 20           # Build mode (max 20 iterations)
-#   ./scripts/ralph-loop.sh plan         # Planning mode (creates IMPLEMENTATION_PLAN.md)
+#   ./scripts/ralph-loop-copilot.sh              # Build mode (unlimited)
+#   ./scripts/ralph-loop-copilot.sh 20           # Build mode (max 20 iterations)
+#   ./scripts/ralph-loop-copilot.sh plan         # Planning mode (optional)
 #
 
 set -e
@@ -40,9 +27,8 @@ RLM_INDEX="$RLM_DIR/index.tsv"
 # Configuration
 MAX_ITERATIONS=0  # 0 = unlimited
 MODE="build"
-CLAUDE_CMD="${CLAUDE_CMD:-claude}"
-YOLO_FLAG="--dangerously-skip-permissions"
 RLM_CONTEXT_FILE=""
+COPILOT_CMD="${COPILOT_CMD:-copilot}"
 TAIL_LINES=5
 TAIL_RENDERED_LINES=0
 ROLLING_OUTPUT_LINES=5
@@ -70,41 +56,26 @@ fi
 
 show_help() {
     cat <<EOF
-Ralph Loop for Claude Code
-
-Based on Geoffrey Huntley's Ralph Wiggum methodology + SpecKit specs.
-https://github.com/ghuntley/how-to-ralph-wiggum
+Ralph Loop for GitHub Copilot CLI
 
 Usage:
-  ./scripts/ralph-loop.sh              # Build mode, unlimited iterations
-  ./scripts/ralph-loop.sh 20           # Build mode, max 20 iterations  
-  ./scripts/ralph-loop.sh plan         # Planning mode (optional)
-  ./scripts/ralph-loop.sh --rlm-context ./rlm/context.txt
-  ./scripts/ralph-loop.sh --rlm ./rlm/context.txt
+  ./scripts/ralph-loop-copilot.sh              # Build mode, unlimited
+  ./scripts/ralph-loop-copilot.sh 20           # Build mode, max 20 iterations
+  ./scripts/ralph-loop-copilot.sh plan         # Planning mode (OPTIONAL)
+  ./scripts/ralph-loop-copilot.sh --rlm-context ./rlm/context.txt
+  ./scripts/ralph-loop-copilot.sh --rlm ./rlm/context.txt
 
 Modes:
-  build (default)  Pick spec/task and implement
-  plan             Create IMPLEMENTATION_PLAN.md from specs (OPTIONAL)
+  build (default)  Pick incomplete spec and implement
+  plan             Create IMPLEMENTATION_PLAN.md (OPTIONAL)
 
-Work Sources (checked in order):
-  1. IMPLEMENTATION_PLAN.md - If exists, pick highest priority task
-  2. specs/ folder - Otherwise, pick highest priority incomplete spec
-
-The plan mode is OPTIONAL. Most projects can work directly from specs.
+Work Source:
+  Agent reads specs/*.md and picks the highest priority incomplete spec.
 
 RLM Mode (optional):
   --rlm-context <file>  Treat a large context file as external environment.
                         The agent should read slices instead of loading it all.
   --rlm [file]          Shortcut for --rlm-context (defaults to rlm/context.txt)
-
-How it works:
-  1. Each iteration feeds PROMPT.md to Claude via stdin
-  2. Claude picks the HIGHEST PRIORITY incomplete spec/task
-  3. Claude implements, tests, and verifies acceptance criteria
-  4. Claude outputs <promise>DONE</promise> ONLY if criteria are met
-  5. Bash loop checks for the magic phrase
-  6. If found, loop continues to next iteration (fresh context)
-  7. If not found, loop retries
 
 RLM workspace (when enabled):
   - rlm/trace/     Prompt snapshots + outputs per iteration
@@ -116,7 +87,7 @@ EOF
 
 print_latest_output() {
     local log_file="$1"
-    local label="${2:-Claude}"
+    local label="${2:-Copilot}"
     local target="/dev/tty"
 
     [ -f "$log_file" ] || return 0
@@ -141,7 +112,7 @@ print_latest_output() {
 
 watch_latest_output() {
     local log_file="$1"
-    local label="${2:-Claude}"
+    local label="${2:-Copilot}"
     local target="/dev/tty"
     local use_tty=false
     local use_tput=false
@@ -256,26 +227,26 @@ if [ -n "$RLM_CONTEXT_FILE" ]; then
 fi
 
 # Session log (captures ALL output)
-SESSION_LOG="$LOG_DIR/ralph_${MODE}_session_$(date '+%Y%m%d_%H%M%S').log"
+SESSION_LOG="$LOG_DIR/ralph_copilot_${MODE}_session_$(date '+%Y%m%d_%H%M%S').log"
 exec > >(tee -a "$SESSION_LOG") 2>&1
 
-# Check if Claude CLI is available
-if ! command -v "$CLAUDE_CMD" &> /dev/null; then
-    echo -e "${RED}Error: Claude CLI not found${NC}"
+# Check if GitHub Copilot CLI is available
+if ! command -v "$COPILOT_CMD" &> /dev/null; then
+    echo -e "${RED}Error: GitHub Copilot CLI not found${NC}"
     echo ""
     echo "Install one of these AI coding CLIs:"
     echo ""
-    echo "1. Claude Code CLI (recommended for this script):"
+    echo "1. GitHub Copilot CLI (recommended for this script):"
+    echo "   See: https://github.com/features/copilot"
+    echo "   The standalone copilot CLI should be in your PATH"
+    echo ""
+    echo "2. Claude Code CLI:"
     echo "   https://claude.ai/code"
+    echo "   Run with: ./scripts/ralph-loop.sh"
     echo ""
-    echo "2. OpenAI Codex CLI:"
+    echo "3. OpenAI Codex CLI:"
     echo "   npm install -g @openai/codex"
-    echo "   Then: codex login"
     echo "   Run with: ./scripts/ralph-loop-codex.sh"
-    echo ""
-    echo "3. GitHub Copilot CLI:"
-    echo "   gh extension install github/gh-copilot"
-    echo "   Run with: ./scripts/ralph-loop-copilot.sh"
     echo ""
     echo "4. Google Gemini CLI:"
     echo "   (Installation varies by provider)"
@@ -283,15 +254,17 @@ if ! command -v "$CLAUDE_CMD" &> /dev/null; then
     exit 1
 fi
 
-# Determine which prompt to use based on mode and available files
+# Determine prompt file
 if [ "$MODE" = "plan" ]; then
     PROMPT_FILE="PROMPT_plan.md"
 else
     PROMPT_FILE="PROMPT_build.md"
 fi
 
-# Create/update the build prompt to be flexible about plan vs specs
-cat > "PROMPT_build.md" << 'BUILDEOF'
+# Create prompt files if they don't exist (same as ralph-loop.sh)
+if [ ! -f "PROMPT_build.md" ]; then
+    echo -e "${YELLOW}Creating PROMPT_build.md...${NC}"
+    cat > "PROMPT_build.md" << 'BUILDEOF'
 # Ralph Build Mode
 
 Based on Geoffrey Huntley's Ralph Wiggum methodology.
@@ -303,56 +276,6 @@ Based on Geoffrey Huntley's Ralph Wiggum methodology.
 Read `.specify/memory/constitution.md` to understand project principles and constraints.
 
 ---
-BUILDEOF
-
-# Optional RLM context block
-if [ -n "$RLM_CONTEXT_FILE" ]; then
-cat >> "PROMPT_build.md" << EOF
-
-## Phase 0d: RLM Context (Optional)
-
-You have access to a large context file at:
-**$RLM_CONTEXT_FILE**
-
-Treat this file as an external environment. Do NOT paste the whole file into the prompt.
-Instead, inspect it programmatically and recursively:
-
-- Use small slices:
-  ```bash
-  sed -n 'START,ENDp' "$RLM_CONTEXT_FILE"
-  ```
-- Or Python snippets:
-  ```bash
-  python - <<'PY'
-  from pathlib import Path
-  p = Path("$RLM_CONTEXT_FILE")
-  print(p.read_text().splitlines()[START:END])
-  PY
-  ```
-- Use search:
-  ```bash
-  rg -n "pattern" "$RLM_CONTEXT_FILE"
-  ```
-
-Goal: decompose the task into smaller sub-queries and only load the pieces you need.
-This mirrors the Recursive Language Model approach from https://arxiv.org/html/2512.24601v1
-
-## RLM Workspace (Optional)
-
-Past loop outputs are preserved on disk:
-- Iteration logs: `logs/`
-- Prompt/output snapshots: `rlm/trace/`
-- Iteration index: `rlm/index.tsv`
-
-Use these as an external memory store (search/slice as needed).
-If you need a recursive sub-query, write a focused prompt in `rlm/queries/`,
-run:
-  `./scripts/rlm-subcall.sh --query rlm/queries/<file>.md`
-and store the result in `rlm/answers/`.
-EOF
-fi
-
-cat >> "PROMPT_build.md" << 'BUILDEOF'
 
 ## Phase 1: Discover Work Items
 
@@ -431,9 +354,11 @@ Check:
 
 **If ANY check fails:** Fix the issue and try again. Do NOT output the magic phrase.
 BUILDEOF
+fi
 
-# Create planning prompt (only used if plan mode is explicitly requested)
-cat > "PROMPT_plan.md" << 'PLANEOF'
+if [ ! -f "PROMPT_plan.md" ]; then
+    echo -e "${YELLOW}Creating PROMPT_plan.md...${NC}"
+    cat > "PROMPT_plan.md" << 'PLANEOF'
 # Ralph Planning Mode (OPTIONAL)
 
 This mode is OPTIONAL. Most projects work fine directly from specs.
@@ -449,35 +374,6 @@ Only use this when you want a detailed breakdown of specs into smaller tasks.
 0b. Study `specs/` to learn all feature specifications.
 
 ---
-PLANEOF
-
-# Optional RLM context block for planning
-if [ -n "$RLM_CONTEXT_FILE" ]; then
-cat >> "PROMPT_plan.md" << EOF
-
-## Phase 0c: RLM Context (Optional)
-
-You have access to a large context file at:
-**$RLM_CONTEXT_FILE**
-
-Treat this file as an external environment. Do NOT paste the whole file into the prompt.
-Inspect only the slices you need using shell tools or Python.
-This mirrors the Recursive Language Model approach from https://arxiv.org/html/2512.24601v1
-
-## RLM Workspace (Optional)
-
-Past loop outputs are preserved on disk:
-- Iteration logs: `logs/`
-- Prompt/output snapshots: `rlm/trace/`
-- Iteration index: `rlm/index.tsv`
-
-Use these as an external memory store (search/slice as needed).
-For recursive sub-queries, use:
-  `./scripts/rlm-subcall.sh --query rlm/queries/<file>.md`
-EOF
-fi
-
-cat >> "PROMPT_plan.md" << 'PLANEOF'
 
 ## Phase 1: Gap Analysis
 
@@ -524,27 +420,14 @@ When the plan is complete and saved:
 
 `<promise>DONE</promise>`
 PLANEOF
-
-# Check prompt file exists
-if [ ! -f "$PROMPT_FILE" ]; then
-    echo -e "${RED}Error: $PROMPT_FILE not found${NC}"
-    exit 1
-fi
-
-# Build Claude flags
-CLAUDE_FLAGS="-p"
-if [ "$YOLO_ENABLED" = true ]; then
-    CLAUDE_FLAGS="$CLAUDE_FLAGS $YOLO_FLAG"
 fi
 
 # Get current branch
 CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "main")
 
 # Check for work sources - count .md files in specs/
-HAS_PLAN=false
 HAS_SPECS=false
 SPEC_COUNT=0
-[ -f "IMPLEMENTATION_PLAN.md" ] && HAS_PLAN=true
 if [ -d "specs" ]; then
     SPEC_COUNT=$(find specs -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l)
     [ "$SPEC_COUNT" -gt 0 ] && HAS_SPECS=true
@@ -552,7 +435,7 @@ fi
 
 echo ""
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${GREEN}              RALPH LOOP (Claude Code) STARTING              ${NC}"
+echo -e "${GREEN}              RALPH LOOP (GitHub Copilot) STARTING          ${NC}"
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 echo -e "${BLUE}Mode:${NC}     $MODE"
@@ -564,19 +447,14 @@ echo -e "${YELLOW}YOLO:${NC}     $([ "$YOLO_ENABLED" = true ] && echo "ENABLED" 
 [ $MAX_ITERATIONS -gt 0 ] && echo -e "${BLUE}Max:${NC}      $MAX_ITERATIONS iterations"
 echo ""
 echo -e "${BLUE}Work source:${NC}"
-if [ "$HAS_PLAN" = true ]; then
-    echo -e "  ${GREEN}✓${NC} IMPLEMENTATION_PLAN.md (will use this)"
-else
-    echo -e "  ${YELLOW}○${NC} IMPLEMENTATION_PLAN.md (not found, that's OK)"
-fi
 if [ "$HAS_SPECS" = true ]; then
     echo -e "  ${GREEN}✓${NC} specs/ folder ($SPEC_COUNT specs)"
 else
     echo -e "  ${RED}✗${NC} specs/ folder (no .md files found)"
 fi
 echo ""
-echo -e "${CYAN}The loop checks for <promise>DONE</promise> in each iteration.${NC}"
-echo -e "${CYAN}Agent must verify acceptance criteria before outputting it.${NC}"
+echo -e "${CYAN}Using: $COPILOT_CMD${NC}"
+echo -e "${CYAN}Agent must output <promise>DONE</promise> when complete.${NC}"
 echo ""
 echo -e "${YELLOW}Press Ctrl+C to stop the loop${NC}"
 echo ""
@@ -601,65 +479,86 @@ while true; do
     echo ""
 
     # Log file for this iteration
-    LOG_FILE="$LOG_DIR/ralph_${MODE}_iter_${ITERATION}_$(date '+%Y%m%d_%H%M%S').log"
+    LOG_FILE="$LOG_DIR/ralph_copilot_${MODE}_iter_${ITERATION}_$(date '+%Y%m%d_%H%M%S').log"
+    OUTPUT_FILE="$LOG_DIR/ralph_copilot_output_iter_${ITERATION}_$(date '+%Y%m%d_%H%M%S').txt"
+    RLM_STATUS="unknown"
     : > "$LOG_FILE"
     WATCH_PID=""
 
     if [ "$ROLLING_OUTPUT_INTERVAL" -gt 0 ] && [ "$ROLLING_OUTPUT_LINES" -gt 0 ] && [ -t 1 ] && [ -w /dev/tty ]; then
-        watch_latest_output "$LOG_FILE" "Claude" &
+        watch_latest_output "$LOG_FILE" "Copilot" &
         WATCH_PID=$!
     fi
-    RLM_STATUS="unknown"
 
-    # Snapshot prompt (optional RLM workspace)
+    # Optional RLM context block appended to prompt at runtime
+    EFFECTIVE_PROMPT_FILE="$PROMPT_FILE"
     if [ -n "$RLM_CONTEXT_FILE" ]; then
+        EFFECTIVE_PROMPT_FILE="$LOG_DIR/ralph_copilot_prompt_iter_${ITERATION}_$(date '+%Y%m%d_%H%M%S').md"
+        cat "$PROMPT_FILE" > "$EFFECTIVE_PROMPT_FILE"
+        cat >> "$EFFECTIVE_PROMPT_FILE" << EOF
+
+---
+## RLM Context (Optional)
+
+You have access to a large context file at:
+**$RLM_CONTEXT_FILE**
+
+Treat this file as an external environment. Do NOT paste the whole file into the prompt.
+Instead, inspect it programmatically and recursively.
+EOF
         RLM_PROMPT_SNAPSHOT="$RLM_TRACE_DIR/iter_${ITERATION}_prompt.md"
-        cp "$PROMPT_FILE" "$RLM_PROMPT_SNAPSHOT"
+        cp "$EFFECTIVE_PROMPT_FILE" "$RLM_PROMPT_SNAPSHOT"
     fi
 
-    # Run Claude with prompt via stdin, capture output
-    CLAUDE_OUTPUT=""
-    if CLAUDE_OUTPUT=$(cat "$PROMPT_FILE" | "$CLAUDE_CMD" $CLAUDE_FLAGS 2>&1 | tee "$LOG_FILE"); then
+    # Build Copilot flags for non-interactive mode
+    COPILOT_FLAGS="-p"
+    if [ "$YOLO_ENABLED" = true ]; then
+        COPILOT_FLAGS="$COPILOT_FLAGS --yolo"
+    fi
+    
+    # Read prompt content
+    PROMPT_CONTENT=$(cat "$EFFECTIVE_PROMPT_FILE")
+    
+    echo -e "${BLUE}Running: copilot $COPILOT_FLAGS <prompt>${NC}"
+    echo ""
+    
+    # Run Copilot with prompt via -p flag, capture output
+    COPILOT_EXIT=0
+    COPILOT_OUTPUT=""
+    if COPILOT_OUTPUT=$("$COPILOT_CMD" $COPILOT_FLAGS "$PROMPT_CONTENT" 2>&1 | tee "$LOG_FILE"); then
         if [ -n "$WATCH_PID" ]; then
             kill "$WATCH_PID" 2>/dev/null || true
             wait "$WATCH_PID" 2>/dev/null || true
         fi
         echo ""
-        echo -e "${GREEN}✓ Claude execution completed${NC}"
+        echo -e "${GREEN}✓ Copilot execution completed${NC}"
         
         # Check if DONE promise was output (accept both DONE and ALL_DONE variants)
-        if echo "$CLAUDE_OUTPUT" | grep -qE "<promise>(ALL_)?DONE</promise>"; then
-            DETECTED_SIGNAL=$(echo "$CLAUDE_OUTPUT" | grep -oE "<promise>(ALL_)?DONE</promise>" | tail -1)
+        if echo "$COPILOT_OUTPUT" | grep -qE "<promise>(ALL_)?DONE</promise>"; then
+            DETECTED_SIGNAL=$(echo "$COPILOT_OUTPUT" | grep -oE "<promise>(ALL_)?DONE</promise>" | tail -1)
             echo -e "${GREEN}✓ Completion signal detected: ${DETECTED_SIGNAL}${NC}"
             echo -e "${GREEN}✓ Task completed successfully!${NC}"
             CONSECUTIVE_FAILURES=0
             RLM_STATUS="done"
             
-            # For planning mode, stop after one successful plan
             if [ "$MODE" = "plan" ]; then
                 echo ""
                 echo -e "${GREEN}Planning complete!${NC}"
-                echo -e "${CYAN}Run './scripts/ralph-loop.sh' to start building.${NC}"
-                echo -e "${CYAN}Or delete IMPLEMENTATION_PLAN.md to work directly from specs.${NC}"
                 break
             fi
         else
             echo -e "${YELLOW}⚠ No completion signal found${NC}"
             echo -e "${YELLOW}  Agent did not output <promise>DONE</promise> or <promise>ALL_DONE</promise>${NC}"
-            echo -e "${YELLOW}  This means acceptance criteria were not met.${NC}"
             echo -e "${YELLOW}  Retrying in next iteration...${NC}"
             CONSECUTIVE_FAILURES=$((CONSECUTIVE_FAILURES + 1))
             RLM_STATUS="incomplete"
-            print_latest_output "$LOG_FILE" "Claude"
+            print_latest_output "$LOG_FILE" "Copilot"
             
             if [ $CONSECUTIVE_FAILURES -ge $MAX_CONSECUTIVE_FAILURES ]; then
                 echo ""
                 echo -e "${RED}⚠ $MAX_CONSECUTIVE_FAILURES consecutive iterations without completion.${NC}"
-                echo -e "${RED}  The agent may be stuck. Consider:${NC}"
-                echo -e "${RED}  - Checking the logs in $LOG_DIR${NC}"
-                echo -e "${RED}  - Simplifying the current spec${NC}"
-                echo -e "${RED}  - Manually fixing blocking issues${NC}"
-                echo ""
+                echo -e "${RED}  The agent may be stuck. Check logs:${NC}"
+                echo -e "${RED}  - $LOG_FILE${NC}"
                 CONSECUTIVE_FAILURES=0
             fi
         fi
@@ -668,11 +567,12 @@ while true; do
             kill "$WATCH_PID" 2>/dev/null || true
             wait "$WATCH_PID" 2>/dev/null || true
         fi
-        echo -e "${RED}✗ Claude execution failed${NC}"
+        COPILOT_EXIT=$?
+        echo -e "${RED}✗ Copilot execution failed (exit code: $COPILOT_EXIT)${NC}"
         echo -e "${YELLOW}Check log: $LOG_FILE${NC}"
         CONSECUTIVE_FAILURES=$((CONSECUTIVE_FAILURES + 1))
         RLM_STATUS="error"
-        print_latest_output "$LOG_FILE" "Claude"
+        print_latest_output "$LOG_FILE" "Copilot"
     fi
 
     # Record iteration in RLM index (optional)
@@ -699,5 +599,5 @@ done
 
 echo ""
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${GREEN}         RALPH LOOP FINISHED ($ITERATION iterations)         ${NC}"
+echo -e "${GREEN}       RALPH LOOP (Copilot) FINISHED ($ITERATION iterations) ${NC}"
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
