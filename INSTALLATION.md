@@ -20,7 +20,11 @@ The goal: Make this feel **lightweight, pleasant, and professional**. Focus on u
 ## Phase 1: Create Structure
 
 ```bash
-mkdir -p .specify/memory specs scripts logs history .cursor/commands .claude/commands
+# Bash
+mkdir -p .specify/memory specs scripts/lib scripts/tests logs history .cursor/commands .claude/commands
+
+# PowerShell
+New-Item -ItemType Directory -Path .specify\memory, specs, scripts\lib, scripts\tests, logs, history, .cursor\commands, .claude\commands -Force
 ```
 
 ---
@@ -454,3 +458,4 @@ Each iteration starts with a fresh context window. No context overflow, no degra
 ---
 
 Ready to create your first specification?
+

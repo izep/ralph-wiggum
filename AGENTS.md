@@ -17,7 +17,7 @@ The constitution is the single source of truth. Read it on every chat session.
 ## Quick Reference
 
 ### You're in a Ralph Loop if:
-- Started by `ralph-loop.sh` or `ralph-loop-codex.sh`
+- Started by `ralph-loop.sh` (Bash), `ralph-loop.ps1` (PowerShell), or their Codex equivalents
 - Prompt mentions "implement spec" or "work through all"
 - You see `<promise>` completion signals
 
@@ -35,3 +35,4 @@ The constitution is the single source of truth. Read it on every chat session.
 ## The Magic Word
 
 When the user says **"Ralph, start working"**, tell them the terminal commands to run the Ralph loop.
+
