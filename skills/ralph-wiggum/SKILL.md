@@ -144,6 +144,25 @@ The more specific your acceptance criteria, the better Ralph performs.
 ./scripts/ralph-loop-codex.sh
 ```
 
+**Windows (PowerShell):**
+
+```powershell
+# Start building (Claude Code)
+.\scripts\ralph-loop.ps1
+
+# With max iterations
+.\scripts\ralph-loop.ps1 20
+
+# Using Codex CLI
+.\scripts\ralph-loop-codex.ps1
+
+# Using Google Gemini CLI
+.\scripts\ralph-loop-gemini.ps1
+
+# Using GitHub Copilot CLI
+.\scripts\ralph-loop-copilot.ps1
+```
+
 ### Logging (All Output Captured)
 
 Every loop run writes **all output** to log files in `logs/`:
@@ -157,9 +176,16 @@ Every loop run writes **all output** to log files in `logs/`:
 Provide a large context file and the agent will treat it as external environment.
 This is **optional and experimental** — it does not implement the full recursive runtime from the paper, but it **does** preserve all loop outputs on disk and guides the agent to query them as needed.
 
+**Bash:**
 ```bash
 ./scripts/ralph-loop.sh --rlm-context ./rlm/context.txt
 ./scripts/ralph-loop-codex.sh --rlm-context ./rlm/context.txt
+```
+
+**PowerShell:**
+```powershell
+.\scripts\ralph-loop.ps1 --rlm-context .\rlm\context.txt
+.\scripts\ralph-loop-codex.ps1 --rlm-context .\rlm\context.txt
 ```
 
 RLM workspace (when enabled):
@@ -169,18 +195,24 @@ RLM workspace (when enabled):
 
 Optional recursive subcalls:
 
+**Bash:**
 ```bash
 ./scripts/rlm-subcall.sh --query rlm/queries/q1.md
+```
+
+**PowerShell:**
+```powershell
+.\scripts\rlm-subcall.ps1 --query rlm\queries\q1.md
 ```
 
 This mirrors the Recursive Language Model (RLM) idea: handle huge prompts by inspecting only the slices you need.
 
 ## Two Modes
 
-| Mode | Purpose | Command |
-|------|---------|---------|
-| **build** (default) | Pick spec, implement, test, commit | `./scripts/ralph-loop.sh` |
-| **plan** (optional) | Create detailed task breakdown | `./scripts/ralph-loop.sh plan` |
+| Mode | Purpose | Bash | PowerShell |
+|------|---------|---------|------------|
+| **build** (default) | Pick spec, implement, test, commit | `./scripts/ralph-loop.sh` | `.\scripts\ralph-loop.ps1` |
+| **plan** (optional) | Create detailed task breakdown | `./scripts/ralph-loop.sh plan` | `.\scripts\ralph-loop.ps1 plan` |
 
 ## Key Principles
 
