@@ -15,6 +15,8 @@
 
 The goal: Make this feel **lightweight, pleasant, and professional**. Focus on understanding the *project*, not interrogating about technical minutiae.
 
+> **Platform note:** Command examples show macOS/Linux syntax by default. On Windows/PowerShell, run the `.ps1` equivalents with `pwsh -NoProfile -File .\scripts\<name>.ps1`.
+
 ---
 
 ## Phase 1: Create Structure
@@ -43,6 +45,8 @@ Fetch from GitHub raw URLs:
 ```bash
 chmod +x scripts/ralph-loop.sh scripts/ralph-loop-codex.sh scripts/ralph-loop-copilot.sh scripts/ralph-loop-gemini.sh
 ```
+
+> Windows users: download the `.ps1` equivalents from the same URLs (replace `.sh` with `.ps1`, e.g., `ralph-loop.ps1`) and run them via PowerShell instead of Bash.
 
 ---
 
@@ -164,7 +168,7 @@ At session start, check for updates:
 
 ## Context Detection
 
-**Ralph Loop Mode** (you're in this if started by ralph-loop.sh):
+**Ralph Loop Mode** (you're in this if started by `ralph-loop.sh` / `ralph-loop.ps1`):
 - Focus on implementation — no unnecessary questions
 - Pick highest priority incomplete spec
 - Complete ALL acceptance criteria
@@ -247,6 +251,13 @@ When all specs appear complete, the agent will:
 
 # With iteration limit
 ./scripts/ralph-loop.sh 20
+
+# Windows/PowerShell equivalents
+pwsh -NoProfile -File .\scripts\ralph-loop.ps1
+pwsh -NoProfile -File .\scripts\ralph-loop-codex.ps1
+pwsh -NoProfile -File .\scripts\ralph-loop-copilot.ps1
+pwsh -NoProfile -File .\scripts\ralph-loop-gemini.ps1
+pwsh -NoProfile -File .\scripts\ralph-loop.ps1 20
 ```
 
 ---
@@ -284,7 +295,7 @@ Same content as AGENTS.md.
 
 ## Phase 7: Create Prompts
 
-> **Note:** Both `ralph-loop.sh` and `ralph-loop-codex.sh` will auto-create these files if missing.
+> **Note:** Both `ralph-loop.sh` / `ralph-loop.ps1` and `ralph-loop-codex.sh` / `ralph-loop-codex.ps1` will auto-create these files if missing.
 > You can still create them manually for customization.
 
 ### PROMPT_build.md
@@ -368,10 +379,10 @@ Here's what was created:
 | File | Purpose |
 |------|---------|
 | `.specify/memory/constitution.md` | Your project's guiding document |
-| `scripts/ralph-loop.sh` | The autonomous build loop (Claude/Cursor) |
-| `scripts/ralph-loop-codex.sh` | The autonomous build loop (Codex) |
-| `scripts/ralph-loop-copilot.sh` | The autonomous build loop (GitHub Copilot) |
-| `scripts/ralph-loop-gemini.sh` | The autonomous build loop (Gemini) |
+| `scripts/ralph-loop.sh` / `scripts/ralph-loop.ps1` | The autonomous build loop (Claude/Cursor) |
+| `scripts/ralph-loop-codex.sh` / `scripts/ralph-loop-codex.ps1` | The autonomous build loop (Codex) |
+| `scripts/ralph-loop-copilot.sh` / `scripts/ralph-loop-copilot.ps1` | The autonomous build loop (GitHub Copilot) |
+| `scripts/ralph-loop-gemini.sh` / `scripts/ralph-loop-gemini.ps1` | The autonomous build loop (Gemini) |
 | `AGENTS.md` / `CLAUDE.md` | Entry points for AI agents |
 | `PROMPT_build.md` | Instructions for build mode |
 
@@ -399,17 +410,17 @@ Each spec needs **clear acceptance criteria** — specific, testable requirement
 Once you have specs, run:
 
 ```bash
-# For Claude Code / Cursor
-./scripts/ralph-loop.sh
+# macOS/Linux
+./scripts/ralph-loop.sh              # Claude / Cursor
+./scripts/ralph-loop-codex.sh        # Codex CLI
+./scripts/ralph-loop-copilot.sh      # GitHub Copilot CLI
+./scripts/ralph-loop-gemini.sh       # Gemini CLI
 
-# For Codex CLI
-./scripts/ralph-loop-codex.sh
-
-# For GitHub Copilot CLI
-./scripts/ralph-loop-copilot.sh
-
-# For Gemini CLI
-./scripts/ralph-loop-gemini.sh
+# Windows/PowerShell
+pwsh -NoProfile -File .\scripts\ralph-loop.ps1
+pwsh -NoProfile -File .\scripts\ralph-loop-codex.ps1
+pwsh -NoProfile -File .\scripts\ralph-loop-copilot.ps1
+pwsh -NoProfile -File .\scripts\ralph-loop-gemini.ps1
 ```
 
 Ralph will:
@@ -444,16 +455,16 @@ Each iteration starts with a fresh context window. No context overflow, no degra
 
 ### Quick Reference
 
-| Task | Command |
-|------|---------|
-| Create spec | Tell me or `/speckit.specify [feature]` |
-| Start building (Claude) | `./scripts/ralph-loop.sh` |
-| Use Codex | `./scripts/ralph-loop-codex.sh` |
-| Use Copilot | `./scripts/ralph-loop-copilot.sh` |
-| Use Gemini | `./scripts/ralph-loop-gemini.sh` |
-| Limit iterations | `./scripts/ralph-loop.sh 20` |
-| RLM mode (large context) | `./scripts/ralph-loop.sh --rlm-context ./rlm/context.txt` |
-| RLM subcall (optional) | `./scripts/rlm-subcall.sh --query rlm/queries/q1.md` |
+| Task | macOS/Linux | Windows/PowerShell |
+|------|-------------|--------------------|
+| Create spec | Tell me or `/speckit.specify [feature]` | Same |
+| Start building (Claude) | `./scripts/ralph-loop.sh` | `pwsh -NoProfile -File .\scripts\ralph-loop.ps1` |
+| Use Codex | `./scripts/ralph-loop-codex.sh` | `pwsh -NoProfile -File .\scripts\ralph-loop-codex.ps1` |
+| Use Copilot | `./scripts/ralph-loop-copilot.sh` | `pwsh -NoProfile -File .\scripts\ralph-loop-copilot.ps1` |
+| Use Gemini | `./scripts/ralph-loop-gemini.sh` | `pwsh -NoProfile -File .\scripts\ralph-loop-gemini.ps1` |
+| Limit iterations | `./scripts/ralph-loop.sh 20` | `pwsh -NoProfile -File .\scripts\ralph-loop.ps1 20` |
+| RLM mode (large context) | `./scripts/ralph-loop.sh --rlm-context ./rlm/context.txt` | `pwsh -NoProfile -File .\scripts\ralph-loop.ps1 --rlm-context .\rlm\context.txt` |
+| RLM subcall (optional) | `./scripts/rlm-subcall.sh --query rlm/queries/q1.md` | `pwsh -NoProfile -File .\scripts\rlm-subcall.ps1 --query .\rlm\queries\q1.md` |
 
 ---
 

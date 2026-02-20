@@ -74,6 +74,8 @@ AI coding agents work autonomously:
 
 ## Ralph Wiggum Configuration
 
+> **Platform note:** Commands below show macOS/Linux syntax. On Windows/PowerShell, run the `.ps1` equivalents with `pwsh -NoProfile -File .\scripts\<name>.ps1`.
+
 ### Autonomy Settings
 - **YOLO Mode**: [ENABLED/DISABLED]
   - Claude: `--dangerously-skip-permissions`
@@ -100,6 +102,11 @@ Located in `scripts/`:
 # Building: Implement tasks one by one
 ./scripts/ralph-loop.sh        # Unlimited
 ./scripts/ralph-loop.sh 20     # Max 20 iterations
+
+# Windows/PowerShell
+pwsh -NoProfile -File .\scripts\ralph-loop.ps1 plan
+pwsh -NoProfile -File .\scripts\ralph-loop.ps1
+pwsh -NoProfile -File .\scripts\ralph-loop.ps1 20
 ```
 
 ---
@@ -122,6 +129,9 @@ Use the SpecKit approach:
 ```bash
 ./scripts/ralph-loop.sh plan
 ```
+```powershell
+pwsh -NoProfile -File .\scripts\ralph-loop.ps1 plan
+```
 
 This analyzes specs vs current code and creates IMPLEMENTATION_PLAN.md.
 
@@ -129,6 +139,9 @@ This analyzes specs vs current code and creates IMPLEMENTATION_PLAN.md.
 
 ```bash
 ./scripts/ralph-loop.sh
+```
+```powershell
+pwsh -NoProfile -File .\scripts\ralph-loop.ps1
 ```
 
 Each iteration:

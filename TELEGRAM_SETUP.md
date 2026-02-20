@@ -2,6 +2,8 @@
 
 Ralph Wiggum can send progress updates via Telegram to keep you informed about spec completions, failures, and loop status.
 
+> **Platform note:** Replace `./scripts/*.sh` with `pwsh -NoProfile -File .\scripts\*.ps1` when running on Windows/PowerShell.
+
 ## Prerequisites
 
 You'll need:
@@ -60,6 +62,14 @@ And source it before running the Ralph loop:
 source .env
 ./scripts/ralph-loop.sh
 ```
+```powershell
+Get-Content .env | ForEach-Object {
+  if ($_ -match "^(?<key>[^=]+)=(?<value>.+)$") {
+    Set-Item -Path Env:$($Matches.key) -Value $Matches.value
+  }
+}
+pwsh -NoProfile -File .\scripts\ralph-loop.ps1
+```
 
 ## Step 4: Test the Connection
 
@@ -97,6 +107,9 @@ When running the Ralph loop:
 ```bash
 ./scripts/ralph-loop.sh --telegram-audio
 ```
+```powershell
+pwsh -NoProfile -File .\scripts\ralph-loop.ps1 --telegram-audio
+```
 
 You'll receive voice messages with progress updates!
 
@@ -116,6 +129,9 @@ If you have the environment variables set but want to run without notifications:
 
 ```bash
 ./scripts/ralph-loop.sh --no-telegram
+```
+```powershell
+pwsh -NoProfile -File .\scripts\ralph-loop.ps1 --no-telegram
 ```
 
 ## What Notifications Do You Get?

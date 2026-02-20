@@ -2,7 +2,11 @@
 # PowerShell version
 
 # Import dependencies
-. "$PSScriptRoot\date_utils.ps1"
+$script:CircuitBreakerRoot = Split-Path -Parent $PSCommandPath
+if (-not $script:CircuitBreakerRoot) {
+    $script:CircuitBreakerRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+}
+. (Join-Path $script:CircuitBreakerRoot "date_utils.ps1")
 
 # Circuit Breaker States
 $CB_STATE_CLOSED = "CLOSED"
@@ -15,10 +19,11 @@ $CB_NO_PROGRESS_THRESHOLD = 5
 $CB_SAME_ERROR_THRESHOLD = 3
 
 # Colors
-$RED = "`[0;31m"
-$GREEN = "`[0;32m"
-$YELLOW = "`[1;33m"
-$NC = "`[0m"
+$esc = [char]27
+$RED = "$esc[0;31m"
+$GREEN = "$esc[0;32m"
+$YELLOW = "$esc[1;33m"
+$NC = "$esc[0m"
 
 function Init-CircuitBreaker {
     if (-not (Test-Path $CB_STATE_FILE)) {
@@ -132,9 +137,9 @@ function Record-LoopResult {
     # Log state transition
     if ($newState -ne $currentState) {
         switch ($newState) {
-            $CB_STATE_OPEN { Write-Host "${RED}?? CIRCUIT BREAKER OPENED: $reason${NC}" }
-            $CB_STATE_HALF_OPEN { Write-Host "${YELLOW}?? CIRCUIT BREAKER: Monitoring - $reason${NC}" }
-            $CB_STATE_CLOSED { Write-Host "${GREEN}? CIRCUIT BREAKER: Normal Operation - $reason${NC}" }
+            $CB_STATE_OPEN { Write-Host ("{0}üö® CIRCUIT BREAKER OPENED: {1}{2}" -f $RED, $reason, $NC) }
+            $CB_STATE_HALF_OPEN { Write-Host ("{0}‚ö†Ô∏è  CIRCUIT BREAKER: Monitoring - {1}{2}" -f $YELLOW, $reason, $NC) }
+            $CB_STATE_CLOSED { Write-Host ("{0}‚úÖ CIRCUIT BREAKER: Normal Operation - {1}{2}" -f $GREEN, $reason, $NC) }
         }
     }
 
@@ -144,16 +149,17 @@ function Record-LoopResult {
 function Test-ShouldHaltExecution {
     $state = Get-CircuitState
     if ($state -eq $CB_STATE_OPEN) {
-        Write-Host "${RED}+-----------------------------------------------------------+${NC}"
-        Write-Host "${RED}¶  EXECUTION HALTED: Circuit Breaker Opened               ¶${NC}"
-        Write-Host "${RED}+-----------------------------------------------------------+${NC}"
+        $border = "+-----------------------------------------------------------+"
+        Write-Host ("{0}{1}{2}" -f $RED, $border, $NC)
+        Write-Host ("{0}|  EXECUTION HALTED: Circuit Breaker Opened               |{1}" -f $RED, $NC)
+        Write-Host ("{0}{1}{2}" -f $RED, $border, $NC)
         Write-Host ""
-        Write-Host "${YELLOW}Ralph detected no progress is being made.${NC}"
+        Write-Host ("{0}Ralph detected no progress is being made.{1}" -f $YELLOW, $NC)
         Write-Host ""
         Write-Host "Possible reasons:"
-        Write-Host "  ï Task may be complete"
-        Write-Host "  ï Agent may be stuck on an error"
-        Write-Host "  ï Prompt needs clarification"
+        Write-Host "  - Task may be complete"
+        Write-Host "  - Agent may be stuck on an error"
+        Write-Host "  - Prompt needs clarification"
         Write-Host ""
         Write-Host "To continue:"
         Write-Host "  1. Review logs"
@@ -176,7 +182,7 @@ function Reset-CircuitBreaker {
         reason = $reason
     }
     $state | ConvertTo-Json | Set-Content $CB_STATE_FILE
-    Write-Host "${GREEN}? Circuit breaker reset to CLOSED state${NC}"
+    Write-Host ("{0}‚úÖ Circuit breaker reset to CLOSED state{1}" -f $GREEN, $NC)
 }
 
 function Show-CircuitStatus {

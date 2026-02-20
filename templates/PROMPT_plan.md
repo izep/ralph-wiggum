@@ -4,7 +4,7 @@
 >
 > Only use this when you want a detailed breakdown of large specs into smaller tasks.
 >
-> **Preferred workflow:** Just run `./scripts/ralph-loop.sh` — it works directly from specs.
+> **Preferred workflow:** Just run `./scripts/ralph-loop.sh` (macOS/Linux) or `pwsh -NoProfile -File .\scripts\ralph-loop.ps1` (Windows) — it works directly from specs.
 
 ---
 

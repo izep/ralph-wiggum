@@ -47,11 +47,16 @@ For each spec in `specs/` (process in numerical order):
    Commit and push when done."
    ```
 
-   ### Shell Script (Universal)
+   ### Shell / PowerShell (Universal)
    ```bash
    ./scripts/ralph-loop.sh {spec-name}
    # or for all specs:
    ./scripts/ralph-loop.sh --all
+   ```
+   ```powershell
+   pwsh -NoProfile -File .\scripts\ralph-loop.ps1 {spec-name}
+   # or for all specs:
+   pwsh -NoProfile -File .\scripts\ralph-loop.ps1 --all
    ```
 
 3. **Verify completion** - Ensure all checklist items in Completion Signal are done

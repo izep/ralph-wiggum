@@ -4,7 +4,11 @@
 
 **To start Ralph loop:**
 ```bash
+# macOS/Linux
 ./scripts/ralph-loop.sh
+
+# Windows/PowerShell
+pwsh -NoProfile -File .\scripts\ralph-loop.ps1
 ```
 
 This works directly from specs — no planning step needed.
@@ -41,7 +45,11 @@ Specs are numbered: `001-xxx`, `002-xxx`, etc.
 
 Only if you need detailed task breakdown:
 ```bash
+# macOS/Linux
 ./scripts/ralph-loop.sh plan
+
+# Windows/PowerShell
+pwsh -NoProfile -File .\scripts\ralph-loop.ps1 plan
 ```
 
 **Most projects don't need this** — specs are the plan.

@@ -14,6 +14,8 @@ The AI will read [INSTALLATION.md](INSTALLATION.md) and guide you through an int
 
 If you prefer to install manually:
 
+> **Platform note:** Command examples use macOS/Linux syntax. On Windows/PowerShell, run the `.ps1` equivalents via `pwsh -NoProfile -File .\scripts\<name>.ps1`.
+
 ### 1. Create Directories
 
 ```bash
@@ -39,6 +41,8 @@ curl -o scripts/ralph-loop-codex.sh \
 # Make executable
 chmod +x scripts/ralph-loop.sh scripts/ralph-loop-codex.sh
 ```
+
+> **Windows/PowerShell:** Use the `.ps1` equivalents in `scripts/` (or download them from the same repository paths) and run them with `pwsh -File .\scripts\<name>.ps1`.
 
 ### 3. Create PROMPT Files
 
@@ -93,7 +97,7 @@ Create `.specify/memory/constitution.md` with your project details:
 ### Context A: Ralph Loop (Implementation Mode)
 
 You are in a Ralph loop if:
-- Started by `ralph-loop.sh` or `ralph-loop-codex.sh`
+- Started by `ralph-loop.sh`/`ralph-loop.ps1` or `ralph-loop-codex.sh`/`ralph-loop-codex.ps1`
 - Prompt mentions "implement spec"
 
 **In this mode:**
@@ -136,6 +140,10 @@ Build exactly what's needed, nothing more.
 ./scripts/ralph-loop.sh           # Build mode
 ./scripts/ralph-loop.sh 20        # Max 20 iterations
 ./scripts/ralph-loop-codex.sh     # Use Codex instead
+# Windows equivalents
+pwsh -NoProfile -File .\scripts\ralph-loop.ps1
+pwsh -NoProfile -File .\scripts\ralph-loop.ps1 20
+pwsh -NoProfile -File .\scripts\ralph-loop-codex.ps1
 ```
 
 ---
@@ -168,7 +176,7 @@ Same content as AGENTS.md.
 ## You're Ready!
 
 1. Create specs with `/speckit.specify [feature description]`
-2. Run `./scripts/ralph-loop.sh` to start building
+2. Run `./scripts/ralph-loop.sh` (macOS/Linux) or `pwsh -File .\scripts\ralph-loop.ps1` (Windows) to start building
 
 See the full [README](README.md) for detailed usage.
 

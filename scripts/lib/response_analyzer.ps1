@@ -1,15 +1,23 @@
 # Response Analyzer for Ralph Loop
 # PowerShell version
 
+# Load shared date helpers for timestamps
+$script:ResponseAnalyzerRoot = Split-Path -Parent $PSCommandPath
+if (-not $script:ResponseAnalyzerRoot) {
+    $script:ResponseAnalyzerRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+}
+. (Join-Path $script:ResponseAnalyzerRoot "date_utils.ps1")
+
 # Configuration
 $COMPLETION_KEYWORDS = @("done", "complete", "finished", "all tasks complete", "project complete", "<promise>DONE</promise>", "<promise>ALL_DONE</promise>")
 
 # Colors
-$RED = "`[0;31m"
-$GREEN = "`[0;32m"
-$YELLOW = "`[1;33m"
-$BLUE = "`[0;34m"
-$NC = "`[0m"
+$esc = [char]27
+$RED = "$esc[0;31m"
+$GREEN = "$esc[0;32m"
+$YELLOW = "$esc[1;33m"
+$BLUE = "$esc[0;34m"
+$NC = "$esc[0m"
 
 function Analyze-Response {
     param($outputFile, $loopNumber, $analysisFile = ".response_analysis")

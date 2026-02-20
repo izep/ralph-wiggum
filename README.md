@@ -26,6 +26,8 @@ openskills install fstandhartinger/ralph-wiggum
 **Human Developer? Start Here:**
 > Read [INSTALL.md](INSTALL.md) for manual setup instructions.
 
+> **Cross-platform tip:** Command examples default to macOS/Linux (`./scripts/*.sh`). On Windows/PowerShell, run the `.ps1` equivalents via `pwsh -NoProfile -File .\scripts\<name>.ps1`.
+
 ---
 
 ## What is Ralph Wiggum?
@@ -88,8 +90,8 @@ The bash loop checks for this phrase. If not found, it retries.
 
 | Mode | Purpose | Command |
 |------|---------|---------|
-| **build** (default) | Pick spec/task, implement, test, commit | `./scripts/ralph-loop.sh` |
-| **plan** (optional) | Create detailed task breakdown from specs | `./scripts/ralph-loop.sh plan` |
+| **build** (default) | Pick spec/task, implement, test, commit | `./scripts/ralph-loop.sh` (macOS/Linux)<br>`.\scripts\ralph-loop.ps1` (Windows/PowerShell) |
+| **plan** (optional) | Create detailed task breakdown from specs | `./scripts/ralph-loop.sh plan` (macOS/Linux)<br>`.\scripts\ralph-loop.ps1 plan` (Windows/PowerShell) |
 
 ### Planning is OPTIONAL
 
@@ -129,6 +131,8 @@ See [INSTALL.md](INSTALL.md) for step-by-step manual instructions.
 
 ## Usage
 
+> **Platform note:** Commands below use macOS/Linux syntax. On Windows/PowerShell, run the `.ps1` equivalents with `pwsh -NoProfile -File .\scripts\<name>.ps1`.
+
 ### 1. Create Specifications
 
 Tell your AI what you want to build, or use `/speckit.specify` in Cursor:
@@ -147,7 +151,11 @@ This creates `specs/001-user-auth/spec.md` with:
 ### 2. (Optional) Run Planning Mode
 
 ```bash
+# macOS/Linux
 ./scripts/ralph-loop.sh plan
+
+# Windows
+pwsh -NoProfile -File .\scripts\ralph-loop.ps1 plan
 ```
 
 Creates `IMPLEMENTATION_PLAN.md` with detailed task breakdown. **This step is optional** — most projects work fine directly from specs.
@@ -155,8 +163,13 @@ Creates `IMPLEMENTATION_PLAN.md` with detailed task breakdown. **This step is op
 ### 3. Run Build Mode
 
 ```bash
+# macOS/Linux
 ./scripts/ralph-loop.sh        # Unlimited iterations
 ./scripts/ralph-loop.sh 20     # Max 20 iterations
+
+# Windows
+pwsh -NoProfile -File .\scripts\ralph-loop.ps1        # Unlimited
+pwsh -NoProfile -File .\scripts\ralph-loop.ps1 20     # Max 20 iterations
 ```
 
 Each iteration:
@@ -206,6 +219,16 @@ Get progress updates via Telegram! See [TELEGRAM_SETUP.md](TELEGRAM_SETUP.md) fo
 # Disable telegram
 ./scripts/ralph-loop.sh --no-telegram
 ```
+```powershell
+# Enable telegram
+pwsh -NoProfile -File .\scripts\ralph-loop.ps1
+
+# Enable audio notifications
+pwsh -NoProfile -File .\scripts\ralph-loop.ps1 --telegram-audio
+
+# Disable telegram
+pwsh -NoProfile -File .\scripts\ralph-loop.ps1 --no-telegram
+```
 
 **What you'll get:**
 - 🚀 Loop start notifications
@@ -231,6 +254,10 @@ This is **optional and experimental** — it does not implement the full recursi
 ./scripts/ralph-loop.sh --rlm-context ./rlm/context.txt
 ./scripts/ralph-loop-codex.sh --rlm-context ./rlm/context.txt
 ```
+```powershell
+pwsh -NoProfile -File .\scripts\ralph-loop.ps1 --rlm-context .\rlm\context.txt
+pwsh -NoProfile -File .\scripts\ralph-loop-codex.ps1 --rlm-context .\rlm\context.txt
+```
 
 RLM workspace (when enabled):
 - `rlm/trace/` — Prompt snapshots per iteration
@@ -242,6 +269,9 @@ Optional recursive subcalls:
 ```bash
 ./scripts/rlm-subcall.sh --query rlm/queries/q1.md
 ```
+```powershell
+pwsh -NoProfile -File .\scripts\rlm-subcall.ps1 --query .\rlm\queries\q1.md
+```
 
 This mirrors the idea from Recursive Language Models (RLMs), which treat long prompts as external environment rather than stuffing them into the context window.
 
@@ -251,6 +281,10 @@ This mirrors the idea from Recursive Language Models (RLMs), which treat long pr
 ./scripts/ralph-loop-codex.sh plan
 ./scripts/ralph-loop-codex.sh
 ```
+```powershell
+pwsh -NoProfile -File .\scripts\ralph-loop-codex.ps1 plan
+pwsh -NoProfile -File .\scripts\ralph-loop-codex.ps1
+```
 
 ### Using GitHub Copilot CLI
 
@@ -258,12 +292,20 @@ This mirrors the idea from Recursive Language Models (RLMs), which treat long pr
 ./scripts/ralph-loop-copilot.sh plan
 ./scripts/ralph-loop-copilot.sh
 ```
+```powershell
+pwsh -NoProfile -File .\scripts\ralph-loop-copilot.ps1 plan
+pwsh -NoProfile -File .\scripts\ralph-loop-copilot.ps1
+```
 
 ### Using Google Gemini CLI
 
 ```bash
 ./scripts/ralph-loop-gemini.sh plan
 ./scripts/ralph-loop-gemini.sh
+```
+```powershell
+pwsh -NoProfile -File .\scripts\ralph-loop-gemini.ps1 plan
+pwsh -NoProfile -File .\scripts\ralph-loop-gemini.ps1
 ```
 
 ---
@@ -279,10 +321,10 @@ project/
 │   └── NNN-feature-name/
 │       └── spec.md               # Feature specification
 ├── scripts/
-│   ├── ralph-loop.sh             # Claude Code loop
-│   ├── ralph-loop-codex.sh       # OpenAI Codex loop
-│   ├── ralph-loop-copilot.sh     # GitHub Copilot loop
-│   └── ralph-loop-gemini.sh      # Google Gemini loop
+│   ├── ralph-loop.sh/.ps1        # Claude Code loop (Bash/Pwsh)
+│   ├── ralph-loop-codex.sh/.ps1  # OpenAI Codex loop
+│   ├── ralph-loop-copilot.sh/.ps1 # GitHub Copilot loop
+│   └── ralph-loop-gemini.sh/.ps1 # Google Gemini loop
 ├── PROMPT_build.md               # Build mode instructions
 ├── PROMPT_plan.md                # Planning mode instructions
 ├── IMPLEMENTATION_PLAN.md        # (OPTIONAL) Detailed task list
